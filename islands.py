@@ -224,7 +224,7 @@ def count_neighbors2(grid, i, j, val):
 
 def get_row_counts(grid, i):
     """Fxn to get the row counts."""
-    return [count_neighbors(grid, i, j, "1") for j in range(len(grid[i]))]
+    return [count_neighbors2(grid, i, j, "1") for j in range(len(grid[i]))]
 
 
 def numIslands3(grid):
@@ -232,11 +232,77 @@ def numIslands3(grid):
 
 
 def numIslands4(grid):
-    """Contains count_neighbors2 with cmore succint but difficult code."""
+    """Contains count_neighbors2 with more succint but difficult code."""
     return [[count_neighbors2(grid, i, j, "1") for j in range(len(grid[i]))]
         for i in range(len(grid))]
 
-numIslands1(grid1)
-numIslands2(grid1)
+# numIslands1(grid1)
+# numIslands2(grid1)
 numIslands3(grid1)
 numIslands4(grid1)
+
+Coord = "tuple(int, int)"
+Grid = "list[list[str]]"
+
+def safe_get(grid: Grid, row: int, col: int, default_val: str = "0") -> "str":
+  """Returns the value at the row, col coordinate of
+   grid or default_val if coordinate is out of bounds."""
+  if 0 <= row < len(grid) and 0 <= col < len(grid[row]):
+    return grid[row][col]
+  return default_val
+
+
+def coord_neighbors(grid: Grid, row: int, col: int, val: str) -> "list[Coord]":
+  """Returns a list of coordinates neighboring (row, col) where value of 
+  coordinate is val."""
+  neighs = []
+  if safe_get(grid, row, col-1) == val:
+    neighs.append((row, col-1))
+  if safe_get(grid, row, col+1) == val:
+    neighs.append((row, col+1))
+  if safe_get(grid, row-1, col) == val:
+    neighs.append((row-1, col))
+  if safe_get(grid, row+1, col) == val:
+    neighs.append((row+1, col))
+  return neighs
+
+
+def island_neighbor_coords(grid: Grid) -> "dict[Coord, list[Coord]]":
+  """Returns a dictionary whose keys are the coordinates with '1' and values are
+  a list of neighboring coordinates with '1'."""
+  ret = {}
+  for row in range(len(grid)):
+    for col in range(len(grid[row])):
+      if grid[row][col] == "1":
+        ret[(row, col)] = coord_neighbors(grid, row, col, "1")
+  return ret
+
+
+# def island_coordinates(grid: Grid) -> List[Coord]:
+#   """Returns a list of coordinates where value of coordinate is '1'."""
+#   islands = []
+#   for row in range(len(grid)):
+#     for col in range(len(grid[row])):
+#       if grid[row][col] == "1":
+#         islands.append((row, col))
+#   return islands
+
+def island_of(grid: Grid, row: int, col: int) -> "list[Coord]":
+  """Returns a list of all coordinates that are a part of the
+  island at (row, col) or an empty list if (row, col) is not
+  part of an island."""
+  if safe_get(grid, row, col, "0") != "1":
+    return []
+  ret = []
+  visited = set()
+  queue = [(row, col)]
+  while queue:
+    coord = queue.pop()
+    if coord not in visited:
+      visited.add(coord)
+      ret.append(coord)
+      r,c = coord
+      queue.extend(coord_neighbors(grid, r, c, "1"))
+  return ret
+
+island_of(grid2, 0, 0)
